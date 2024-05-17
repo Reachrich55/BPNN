@@ -51,7 +51,24 @@ $W^{(l)}$ ：第 $𝑙$层的权重矩阵
 $b^{(l)}$ ：第 $𝑙$层的偏置向量  
 $\delta^{(l)}$：第 $𝑙$ 层的误差项  
 $𝐸$：损失函数 $𝐸=\frac{1}{2}(\hat 𝑦−y)^2$  
-### 3.2 初始化神经网络
+### 3.2 数据预处理
+```python
+def pretreatment(data):
+    # 对sex和smoker进行二元编码
+    data['sex'] = (data['sex'] == 'male').astype(int)
+    data['smoker'] = (data['smoker'] == 'yes').astype(int)
+
+    # 对region进行编码
+    region_map = {'northeast': 0, 'northwest': 1, 'southeast': 2, 'southwest': 3}
+    data['region'] = data['region'].map(region_map)
+
+    # 对数值特征进行归一化
+    numerical_features = ['age', 'children', 'bmi']
+    data[numerical_features] = (data[numerical_features] - data[numerical_features].min()) / (data[numerical_features].max() - data[numerical_features].min())
+
+    return data
+```
+### 3.3 初始化神经网络
 ```python
 input_size = np.size(x, 1)  # 输入特征数:6
 hidden_size = 7  # 隐藏层大小
@@ -72,7 +89,7 @@ class NeuralNetwork:
         self.bias_input_hidden = np.zeros((1, hidden_size))
         self.bias_hidden_output = np.zeros((1, output_size))
 ```
-### 3.3 前向传播
+### 3.4 前向传播
 ```python
     def forward(self, x):
         # 前向传播
@@ -83,7 +100,7 @@ class NeuralNetwork:
 ```
 隐藏层输出： $𝑧=\delta(𝑊^{(1)}𝑥+𝑏^{(1)})$  
 输出层输出： $𝑦=𝑊^{(2)}𝑧+𝑏^{(2)}$  
-### 3.4 反向传播
+### 3.5 反向传播
 ```python
     def backward(self, x, y, output, learning_rate, i):
         # 计算输出层的误差(偏置梯度)
